@@ -1,6 +1,7 @@
 node_modules/
 dist/
 *.log
+*.tsbuildinfo
 .DS_Store
 
 # Env files (never commit secrets)
@@ -9,6 +10,7 @@ dist/
 !.env.example
 packages/*/.env
 packages/*/.env.*
+AGENTS.local.md
 
 # SQLite database + sidecars
 data/

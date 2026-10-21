@@ -1,0 +1,14 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "shadcn": {
+        "type": "local",
+        "command": ["npx", "shadcn@latest", "mcp"],
+        "cwd": "packages/frontend",
+        "disabled": false
+      }
+    }
+  },
+  "instructions": ["AGENTS.md", "packages/frontend/AGENTS.md", "packages/backend/AGENTS.md"]
+}

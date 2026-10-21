@@ -1,0 +1,184 @@
+generator client {
+  provider               = "prisma-client"
+  output                 = "../src/generated/prisma"
+  moduleFormat           = "esm"
+  runtime                = "nodejs"
+  generatedFileExtension = "ts"
+  importFileExtension    = "ts"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Project {
+  id           String        @id @default(uuid())
+  name         String
+  slug         String        @unique
+  description  String?
+  archivedAt   DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  environments Environment[]
+}
+
+model Environment {
+  id           String   @id @default(uuid())
+  projectId    String
+  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name         String
+  slug         String
+  isProduction Boolean  @default(false)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  secrets      Secret[]
+
+  @@unique([projectId, slug])
+  @@index([projectId])
+}
+
+model Secret {
+  id             String          @id @default(uuid())
+  environmentId  String
+  environment    Environment     @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+  key            String
+  currentVersion Int             @default(1)
+  type           String          @default("string")
+  note           String?
+  deletedAt      DateTime?
+  createdById    String?
+  createdByEmail String?
+  updatedById    String?
+  updatedByEmail String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  versions       SecretVersion[]
+
+  @@unique([environmentId, key])
+  @@index([environmentId])
+}
+
+model SecretVersion {
+  id             String   @id @default(uuid())
+  secretId       String
+  secret         Secret   @relation(fields: [secretId], references: [id], onDelete: Cascade)
+  version        Int
+  value          String
+  comment        String?
+  createdById    String?
+  createdByEmail String?
+  createdAt      DateTime @default(now())
+
+  @@unique([secretId, version])
+  @@index([secretId])
+}
+
+// ---------------------------------------------------------------------------
+// better-auth tables (generated with @better-auth/cli, do not rename fields)
+// ---------------------------------------------------------------------------
+
+model User {
+  id               String      @id
+  name             String
+  email            String
+  emailVerified    Boolean     @default(false)
+  image            String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  role             String?
+  banned           Boolean?    @default(false)
+  banReason        String?
+  banExpires       DateTime?
+  twoFactorEnabled Boolean?    @default(false)
+  sessions         Session[]
+  accounts         Account[]
+  twofactors       TwoFactor[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id             String   @id
+  expiresAt      DateTime
+  token          String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  ipAddress      String?
+  userAgent      String?
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  impersonatedBy String?
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+model TwoFactor {
+  id                      String    @id
+  secret                  String
+  backupCodes             String
+  userId                  String
+  user                    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  verified                Boolean?  @default(true)
+  failedVerificationCount Int?      @default(0)
+  lockedUntil             DateTime?
+
+  @@index([secret])
+  @@index([userId])
+  @@map("twoFactor")
+}
+
+model AuditEvent {
+  id              String   @id @default(uuid())
+  actorId         String?
+  actorEmail      String
+  action          String
+  projectId       String?
+  projectName     String?
+  environmentId   String?
+  environmentName String?
+  secretKey       String?
+  metadata        String?
+  ip              String?
+  userAgent       String?
+  createdAt       DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([projectId, createdAt])
+  @@index([action, createdAt])
+}
