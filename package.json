@@ -1,0 +1,22 @@
+{
+  "name": "envault",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "packageManager": "pnpm@12.6.0",
+  "scripts": {
+    "dev": "concurrently -n frontend,backend -c cyan,magenta \"pnpm dev:frontend\" \"pnpm dev:backend\"",
+    "dev:frontend": "pnpm --filter ev-frontend dev",
+    "dev:backend": "pnpm --filter ev-backend dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm --filter ev-frontend lint",
+    "test": "pnpm --filter ev-backend test",
+    "create-admin": "pnpm --filter ev-backend create-admin",
+    "db:generate": "pnpm --filter ev-backend db:generate",
+    "db:migrate": "pnpm --filter ev-backend db:migrate",
+    "db:studio": "pnpm --filter ev-backend db:studio"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  }
+}
